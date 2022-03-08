@@ -1,0 +1,6 @@
+Package: dns_sniff
+Version: 1
+Depends: python3, luasql-sqlite3
+Maintainer: Chaman Suresh
+Architecture: x86_64
+Description:  DNS monitoring and data acquisition tool

@@ -1,0 +1,56 @@
+<!--Place this in lucidir/view-->
+
+<!DOCTYPE html>
+<%+header%>  <!--To mantain the luci format(Will show all the tabs and stuff)-->                                                                
+<h1><%:DNS Sniff%></h1>   
+<!--Lua script--> 
+<%-
+require "luci.http"
+local mymodule = require "luasql.sqlite3"
+local env = mymodule.sqlite3()              --importing the module(luasql.sqlite3.sqlite3())
+local conn = env:connect("dns.db")          -- Conecting to database, --Use the correct path for database
+local cur = assert(conn:execute("SELECT * FROM dns")) 
+row = cur:fetch({},"a") --only first row is fetch, we can say cursor pointing to the next row
+list = {}
+i=1
+while row do
+    list[i]= {row["Names"],row["Visited"]} -- making a array whose elements is an array with two elments Names and visited (2d array)
+    row=cur:fetch(row,"a") -- getting the next rows
+    i = i+1
+end
+
+cur:close()
+conn:close()
+env:close()
+
+table.sort(list,function(k1,k2) return k1[2]>k2[2] end) -- Sorting the list according to Visited(the second element of the rows) 
+
+--Printig the html Str 
+
+str = [[<!DOCTYPE html>
+<html>
+<title></title>
+<head></head>
+<body>
+                <table>
+                <tr>
+                    <th>DNS</th>
+                    <th>Visited</th>
+                </tr>
+                <tr>
+]]
+
+
+for index, value in pairs(list) do
+    str = str.."\t\t\t<td>"..value[1].."<td>\n" -- .. is append
+    str = str.."\t\t\t<td>"..tostring(value[2]).."<td>\n"
+    str=str.."\t\t</tr>\n"
+end
+
+str=str.."\t\t</table>".."\n</body>".."\n</html>"
+
+print(str)
+
+-%>
+<!--Lua Script ends-->
+<%+footer%><!--To mantain the luci format(Will give the link for luci doc at end)-->
